@@ -92,17 +92,17 @@ int main() {
                 perror("Accept failed");
                 continue;
             }
-            
-            
-                client_len = sizeof(client_addr);
-                client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
-                if (client_socket < 0) {
-                    perror("Ошибка принятия соединения");
-                    continue;
-                }
+
+            // Создание дочернего процесса для обработки запроса
+            if (fork() == 0) {
+                close(server_socket); // Дочерний процесс не нуждается в серверном сокете
                 handle_request(client_socket);
                 close(client_socket);
+                exit(0);
             }
+            
+            close(client_socket); // Родительский процесс закрывает сокет клиента
+        }
             exit(0); // Завершение дочернего процесса
         }
     }
@@ -221,4 +221,3 @@ void log_event(const char *message) {
 void sigchld_handler(int s) {
     while(waitpid(-1, NULL, WNOHANG) > 0);
 }
-
