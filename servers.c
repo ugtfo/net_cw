@@ -118,7 +118,27 @@ int main() {
 
 void handle_request(int client_socket) {
     char buffer[BUFFER_SIZE];
-    read(client_socket, buffer, sizeof(buffer));
+    
+    
+    memset(buffer, 0, sizeof(buffer));
+
+    // Чтение данных из сокета
+    ssize_t total_bytes_read = 0;
+    while (total_bytes_read < BUFFER_SIZE - 1) {
+        ssize_t bytes_read = read(client_socket, buffer + total_bytes_read, sizeof(buffer) - total_bytes_read - 1);
+        if (bytes_read <= 0) {
+            break; // Ошибка чтения или соединение закрыто
+        }
+        total_bytes_read += bytes_read;
+
+        // Проверка на наличие завершения строки (например, пустая строка после заголовков)
+        if (buffer[total_bytes_read - 1] == '\n' && total_bytes_read > 1 && buffer[total_bytes_read - 2] == '\r') {
+            break; // Завершение заголовков
+        }
+    }
+    buffer[total_bytes_read] = '0'; // Завершаем строку
+     
+    //read(client_socket, buffer, sizeof(buffer));
 
     char method[8], path[256];
     sscanf(buffer, "%s %s", method, path);
