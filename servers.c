@@ -13,10 +13,12 @@
 
 
 
-#define PORT 8080
+#define PORT 8081
 #define BUFFER_SIZE 4096
 #define MAX_CONNECTIONS 10
 #define MAX_FILE_SIZE (128 * 1024 * 1024) // 128 MB
+#define NUM_WORKERS 16
+#define BACKLOG 16
 
 void handle_request(int client_socket);
 void send_response(int client_socket, const char *status, const char *content_type, const char *body);
@@ -60,6 +62,8 @@ int main() {
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
     sigaction(SIGCHLD, &sa, NULL);
+    
+    printf("Server is running on port %d...\n", PORT);
 
     // Создание дочерних процессов
     for (int i = 0; i < NUM_WORKERS; i++) {
@@ -114,6 +118,7 @@ int main() {
     }
 
     return 0;
+}
 }
 
 void handle_request(int client_socket) {
