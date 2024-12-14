@@ -67,7 +67,15 @@ int main() {
 
     // Создание дочерних процессов
     for (int i = 0; i < NUM_WORKERS; i++) {
-        if (fork() == 0) { // Дочерний процесс
+    
+    	
+    	//if (fork() == 0) { // Дочерний процесс
+    	pid_t pid = fork(); // Создаем новый процесс
+
+    	if (pid < 0) {
+        	perror("fork failed");
+        	return 1;
+    	} else if (pid == 0) { // Дочерний процесс
             while (1) {
             
             
